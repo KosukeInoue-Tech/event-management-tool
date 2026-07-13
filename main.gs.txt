@@ -1,0 +1,20 @@
+function sendReminders() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var dbSheet = ss.getSheetByName('シート1');
+  var data = dbSheet.getDataRange().getValues();
+  
+  // 2行目からデータを見ていく
+  for (var i = 1; i < data.length; i++) {
+    var email = data[i][5];    // F列：メアド
+    var status = data[i][8];   // I列：支払い状況（A=0, B=1... I=8）
+    
+    // 「未納」の人だけにメールを送る！
+    if (email !== "" && status === "未納") {
+      MailApp.sendEmail(email, "【要確認】イベント参加費のお支払いについて", "入金確認ができておりません。ご確認をお願いします。");
+      
+      // K列に日付、L列に回数を記録
+      dbSheet.getRange(i + 1, 11).setValue(new Date()); 
+      dbSheet.getRange(i + 1, 12).setValue((data[i][11] || 0) + 1); 
+    }
+  }
+}
